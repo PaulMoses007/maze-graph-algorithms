@@ -1,0 +1,41 @@
+Maze Graph Algorithms Results
+============================
+
+Maze File: maze_10x10_A.txt
+
+SUBTASK A
+-----------------
+Movement Mode: 4-directional
+Minimum Moves: 18
+
+SUBTASK B
+-----------------
+Movement Mode: 4-directional
+Cost Model: Entering Cost
+Minimum Cost: 26
+
+SUBTASK C
+-----------------
+4-direction shortest path: 18
+8-direction shortest path: 11
+
+4-direction minimum cost: 26
+8-direction minimum cost: 18
+
+Discussion:
+Diagonal movement changes the shortest path.
+Diagonal movement changes the cheapest path.
+Shortest path and cheapest path are different.
+
+SUBTASK D
+-----------------
+Movement Mode: 4-directional
+Maximum Flow From G To S: 1
+
+SUBTASK E
+-----------------
+Movement Mode: 4-directional
+MST Total Weight: 390
+Vertices In Component: 76
+Edges In Tree: 75
+Goal Reachable: True
