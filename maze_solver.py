@@ -1,13 +1,19 @@
 from collections import deque
 import heapq
+import sys
 
 # =====================================================
 # Maze Graph Algorithms
 #
 # Team Members:
-# - Paul Moses
-# - Sahan
-# - Canistan
+# Thomas Aaran Paul Moses - 231ADB187
+# Herath Mudiyanselage Sahan Kavinda Sepala - 231ADB248
+# Yabesh Canistan Raj Kumar - 231ADB199
+#
+# Language: Python 3
+#
+# Run:
+# python maze_solver.py maze_10x10_A.txt
 # =====================================================
 
 
@@ -43,6 +49,9 @@ def find_start_goal(maze):
 
 # =====================================================
 # Neighbor Function
+#
+# Time: O(1)
+# Space: O(1)
 # =====================================================
 
 def get_neighbors(maze, row, col, movement_mode="4"):
@@ -96,7 +105,25 @@ def cell_value(cell):
 
 
 # =====================================================
+# Path Formatting
+# =====================================================
+
+def format_path(path):
+
+    if not path:
+        return "No Path"
+
+    return "->".join(
+        f"({r},{c})"
+        for r, c in path
+    )
+
+
+# =====================================================
 # BFS Shortest Path
+#
+# Time: O(V + E)
+# Space: O(V)
 # =====================================================
 
 def bfs_shortest_path(maze, start, goal, movement_mode="4"):
@@ -149,6 +176,11 @@ def bfs_shortest_path(maze, start, goal, movement_mode="4"):
 
 # =====================================================
 # Dijkstra Minimum Cost
+#
+# Cost Model 1 (Entering Cost)
+#
+# Time: O((V+E) log V)
+# Space: O(V)
 # =====================================================
 
 def dijkstra_min_cost(maze, start, goal, movement_mode="4"):
@@ -182,11 +214,17 @@ def dijkstra_min_cost(maze, start, goal, movement_mode="4"):
 
             nr, nc = neighbor
 
-            move_cost = cell_value(maze[nr][nc])
+            move_cost = cell_value(
+                maze[nr][nc]
+            )
 
             new_cost = current_cost + move_cost
 
-            if neighbor not in distances or new_cost < distances[neighbor]:
+            if (
+                neighbor not in distances
+                or
+                new_cost < distances[neighbor]
+            ):
 
                 distances[neighbor] = new_cost
 
@@ -265,9 +303,12 @@ def bfs_flow(residual, source, sink, parent):
 
         u = queue.popleft()
 
-        for v, capacity in residual[u].items():
+        for v, cap in residual[u].items():
 
-            if v not in visited and capacity > 0:
+            if (
+                v not in visited
+                and cap > 0
+            ):
 
                 visited.add(v)
 
@@ -278,12 +319,18 @@ def bfs_flow(residual, source, sink, parent):
     return sink in visited
 
 
+# =====================================================
+# Edmonds-Karp
+#
+# Time: O(VE²)
+# Space: O(V+E)
+# =====================================================
+
 def edmonds_karp(graph, source, sink):
 
     residual = {}
 
     for u in graph:
-
         residual[u] = {}
 
         for v in graph[u]:
@@ -299,8 +346,6 @@ def edmonds_karp(graph, source, sink):
                 residual[v][u] = 0
 
     max_flow = 0
-
-    positive_flow = []
 
     while True:
 
@@ -338,20 +383,35 @@ def edmonds_karp(graph, source, sink):
             residual[u][v] -= path_flow
             residual[v][u] += path_flow
 
-            positive_flow.append(
-                (u, v, path_flow)
-            )
-
             v = parent[v]
 
-    return max_flow, positive_flow
+    positive_edges = []
+
+    for u in graph:
+        for v in graph[u]:
+
+            flow = (
+                graph[u][v]
+                - residual[u][v]
+            )
+
+            if flow > 0:
+
+                positive_edges.append(
+                    (u, v, flow, graph[u][v])
+                )
+
+    return max_flow, positive_edges
 
 
 # =====================================================
-# Weighted Graph For MST
+# Weighted Graph for MST
 # =====================================================
 
-def build_weighted_graph(maze, movement_mode="4"):
+def build_weighted_graph(
+    maze,
+    movement_mode="4"
+):
 
     graph = {}
 
@@ -389,19 +449,20 @@ def build_weighted_graph(maze, movement_mode="4"):
 
 # =====================================================
 # Prim MST
+#
+# Time: O(E log V)
+# Space: O(V)
 # =====================================================
 
 def prim_mst(graph, start):
 
-    visited = set()
+    visited = {start}
 
     mst_edges = []
 
     total_weight = 0
 
     pq = []
-
-    visited.add(start)
 
     for neighbor, weight in graph[start]:
         heapq.heappush(
@@ -436,114 +497,195 @@ def prim_mst(graph, start):
     return total_weight, mst_edges, visited
 
 
-# =====================================================
-# MAIN
-# =====================================================
+def main():
 
-maze = load_maze("maze_10x10_A.txt")
+    filename = (
+        sys.argv[1]
+        if len(sys.argv) > 1
+        else "maze_10x10_A.txt"
+    )
 
-start, goal = find_start_goal(maze)
+    maze = load_maze(filename)
 
-print("================================================")
-print("Maze Graph Algorithms")
-print("================================================")
+    start, goal = find_start_goal(maze)
 
-print("\nStart:", start)
-print("Goal:", goal)
+    output = []
 
-# ---------- A ----------
+    output.append("Maze Graph Algorithms")
+    output.append("=" * 50)
 
-path_a_4 = bfs_shortest_path(
-    maze,
-    start,
-    goal,
-    "4"
-)
+    # ---------------------------
+    # Subtask A
+    # ---------------------------
 
-print("\n================================================")
-print("SUBTASK A")
-print("================================================")
+    path_a_4 = bfs_shortest_path(
+        maze,
+        start,
+        goal,
+        "4"
+    )
 
-print("Movement Mode: 4-directional")
-print("Minimum Moves:", len(path_a_4) - 1)
+    output.append("\nSUBTASK A")
+    output.append("Movement Mode: 4-directional")
+    output.append(
+        f"Minimum Moves: {len(path_a_4)-1}"
+    )
+    output.append(
+        f"Path: {format_path(path_a_4)}"
+    )
 
-# ---------- B ----------
+    # ---------------------------
+    # Subtask B
+    # ---------------------------
 
-cost_b_4, path_b_4 = dijkstra_min_cost(
-    maze,
-    start,
-    goal,
-    "4"
-)
+    cost_b_4, path_b_4 = dijkstra_min_cost(
+        maze,
+        start,
+        goal,
+        "4"
+    )
 
-print("\n================================================")
-print("SUBTASK B")
-print("================================================")
+    output.append("\nSUBTASK B")
+    output.append("Movement Mode: 4-directional")
+    output.append("Cost Model: Entering Cost")
+    output.append(
+        f"Minimum Cost: {cost_b_4}"
+    )
+    output.append(
+        f"Path: {format_path(path_b_4)}"
+    )
 
-print("Minimum Cost:", cost_b_4)
+    # ---------------------------
+    # Subtask C
+    # ---------------------------
 
-# ---------- C ----------
+    path_a_8 = bfs_shortest_path(
+        maze,
+        start,
+        goal,
+        "8"
+    )
 
-path_a_8 = bfs_shortest_path(
-    maze,
-    start,
-    goal,
-    "8"
-)
+    cost_b_8, path_b_8 = dijkstra_min_cost(
+        maze,
+        start,
+        goal,
+        "8"
+    )
 
-cost_b_8, path_b_8 = dijkstra_min_cost(
-    maze,
-    start,
-    goal,
-    "8"
-)
+    output.append("\nSUBTASK C")
 
-print("\n================================================")
-print("SUBTASK C")
-print("================================================")
+    output.append(
+        f"4-direction shortest path: {len(path_a_4)-1}"
+    )
 
-print("4-direction shortest path:", len(path_a_4) - 1)
-print("8-direction shortest path:", len(path_a_8) - 1)
+    output.append(
+        f"8-direction shortest path: {len(path_a_8)-1}"
+    )
 
-print("4-direction minimum cost:", cost_b_4)
-print("8-direction minimum cost:", cost_b_8)
+    output.append(
+        f"4-direction minimum cost: {cost_b_4}"
+    )
 
-# ---------- D ----------
+    output.append(
+        f"8-direction minimum cost: {cost_b_8}"
+    )
 
-graph = build_flow_network(
-    maze,
-    "4"
-)
+    output.append(
+        "Diagonal movement reduces both shortest path length and minimum cost."
+    )
 
-max_flow, positive_edges = edmonds_karp(
-    graph,
-    goal,
-    start
-)
+    output.append(
+        "The path with the fewest moves may differ from the lowest-cost path because low-cost cells may require additional moves."
+    )
 
-print("\n================================================")
-print("SUBTASK D")
-print("================================================")
+    # ---------------------------
+    # Subtask D
+    # ---------------------------
 
-print("Maximum Flow:", max_flow)
+    graph = build_flow_network(
+        maze,
+        "4"
+    )
 
-# ---------- E ----------
+    max_flow, flow_edges = edmonds_karp(
+        graph,
+        goal,
+        start
+    )
 
-weighted_graph = build_weighted_graph(
-    maze,
-    "4"
-)
+    output.append("\nSUBTASK D")
+    output.append(
+        "Movement Mode: 4-directional"
+    )
 
-mst_weight, mst_edges, component = prim_mst(
-    weighted_graph,
-    start
-)
+    output.append(
+        f"Maximum Flow: {max_flow}"
+    )
 
-print("\n================================================")
-print("SUBTASK E")
-print("================================================")
+    output.append(
+        "Positive Flow Edges:"
+    )
 
-print("MST Total Weight:", mst_weight)
-print("Vertices In Component:", len(component))
-print("Edges In Tree:", len(mst_edges))
-print("Goal Reachable:", goal in component)
+    for u, v, flow, cap in flow_edges:
+
+        output.append(
+            f"{u}->{v}: {flow}/{cap}"
+        )
+
+    # ---------------------------
+    # Subtask E
+    # ---------------------------
+
+    weighted_graph = build_weighted_graph(
+        maze,
+        "4"
+    )
+
+    mst_weight, mst_edges, component = prim_mst(
+        weighted_graph,
+        start
+    )
+
+    output.append("\nSUBTASK E")
+
+    output.append(
+        "Movement Mode: 4-directional"
+    )
+
+    output.append(
+        f"MST Total Weight: {mst_weight}"
+    )
+
+    output.append(
+        f"Vertices In Component: {len(component)}"
+    )
+
+    output.append(
+        f"Edges In Tree: {len(mst_edges)}"
+    )
+
+    output.append(
+        f"Goal Reachable: {goal in component}"
+    )
+
+    output.append("MST Edges:")
+
+    for u, v, w in mst_edges:
+
+        output.append(
+            f"{u}->{v}: {w}"
+        )
+
+    result = "\n".join(output)
+
+    print(result)
+
+    with open("output.txt", "w") as file:
+        file.write(result)
+
+    print("\nResults written to output.txt")
+
+
+if __name__ == "__main__":
+    main()
